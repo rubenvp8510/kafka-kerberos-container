@@ -1,0 +1,13 @@
+version: '2.1'
+services:
+  kafka:
+    image: rubensvp/kafka-kerberos:latest
+    ports:
+      - "9092:9092"
+      - "88:88"
+      - "88:88/udp"
+      - "464:464"
+      - "749:749"
+    environment:
+      REALM: EXAMPLE.COM
+      KADMIN_PASSWORD: qwerty
