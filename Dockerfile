@@ -32,6 +32,8 @@ RUN mkdir -p /tmp/zookeeper && \
     mkdir -p /tmp/kafka-logs && \
     mkdir -p /var/log/supervisor && \
     mkdir -p /var/log/zookeeper && \
+    mkdir -p /var/lib/krb5kdc/ && \
+    mkdir -p /keytabs/ && \
     mkdir "$KAFKA_HOME"/logs && \
     mkdir -p /var/private/ssl/ && \
     chmod -R 777 /var/log/supervisor/ && \
@@ -41,6 +43,11 @@ RUN mkdir -p /tmp/zookeeper && \
     chmod -R 777 "$KAFKA_HOME"/config && \
     chmod -R 777  /tmp/zookeeper && \
     chmod -R 777  /tmp/kafka-logs && \
+    chmod -R 777  /etc/ && \
+    chmod -R 777 /var/lib/krb5kdc/ && \
+    chmod -R 777 /var/kerberos/krb5kdc/ && \
+    chmod -R 777 /var/log/ && \
+    chmod -R 777 /keytabs/ && \
     chmod -R 777 /var/private/ssl
 
 # Supervisor config
@@ -48,6 +55,6 @@ ADD supervisor/kerberos.ini supervisor/initialize.ini supervisor/kafka.ini super
 RUN echo_supervisord_conf | sed -e 's:;\[include\]:\[include\]:g' | sed -e 's:;files = relative/directory/\*.ini:files = /etc/supervisord.d/\*.ini:g' > /etc/supervisord.conf
 
 # 2181 is zookeeper, 9092-9099 is kafka (for different listeners like SSL, INTERNAL, PLAINTEXT etc.)
-EXPOSE 2181 9092 9093 9094 9095 9096 9097 9098 9099 88 464 749
+EXPOSE 2181 9092 9093 9094 9095 9096 9097 9098 9099 8888 8464 8749
 
 CMD ["supervisord", "-n"]

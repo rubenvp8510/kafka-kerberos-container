@@ -4,12 +4,17 @@
 LOCKFILE="/tmp/startscript-lock"
 export JAVA_HOME=$(readlink -f $(which java) | sed -e 's/\/bin\/java//g')
 
+
+
 start(){
   # Assert that there is no other Lambda instance, created with this script, running.
   [ -f $LOCKFILE ] && return 0
   # Create a lock file to prevent multiple instantiations.
   touch $LOCKFILE
-  
+  if [ -z ${REALM} ]; then
+    export REALM="EXAMPLE.COM"
+    echo "REALM not set, using default ${REALM}"
+  fi
   KADMIN_PRINCIPAL="admin/admin"
   KADMIN_PRINCIPAL_FULL="${KADMIN_PRINCIPAL}@${REALM}"
   # All kerberos stuff

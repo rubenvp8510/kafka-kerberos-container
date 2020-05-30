@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [ -z ${REALM} ]; then
-  REALM="EXAMPLE.COM"
-  echo "REALM not set, using default ${REALM}"
-fi
-
 KRB5_KDC="localhost"
 
 if [ -z ${KRB5_ADMINSERVER} ]; then
@@ -25,8 +20,8 @@ cat <<EOT > /etc/krb5.conf
  
  [realms]
  ${REALM} = {
-    kdc = ${KRB5_KDC}
-    admin_server = ${KRB5_ADMINSERVER}
+    kdc = ${KRB5_KDC}:8888
+    admin_server = ${KRB5_ADMINSERVER}:8749
  }
 EOT
 
@@ -36,7 +31,7 @@ if [ ! -f "/var/lib/krb5kdc/principal" ]; then
 
     if [ -z ${KADMIN_PASSWORD} ]; then
         echo "No Password for kdb provided ... Creating One"
-        KADMIN_PASSWORD=`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;`
+        export KADMIN_PASSWORD=`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;`
         echo "Using Password ${KADMIN_PASSWORD}"
     fi
 
@@ -44,12 +39,17 @@ if [ ! -f "/var/lib/krb5kdc/principal" ]; then
     echo "Creating KDC Configuration"
     cat <<EOT > /var/kerberos/krb5kdc/kdc.conf
 [kdcdefaults]
-    kdc_listen = 88
-    kdc_tcp_listen = 88
-    
+    kdc_listen = 8888
+    kdc_tcp_listen = 8888
+    kadmind_port = 8749
+    kpasswd_port = 8464
+    kpasswd_listen = 8464
+    kadmind_listen = 8749
 [realms]
     ${REALM} = {
-        kadmin_port = 749
+      kadmind_port = 8749
+      kpasswd_port = 8464
+      
         max_life = 12h 0m 0s
         max_renewable_life = 7d 0h 0m 0s
         master_key_type = aes256-cts
@@ -78,5 +78,5 @@ EOT
   rm /etc/krb5_pass
 
   echo "Creating Admin Account"
-  kadmin.local -q "addprinc -pw ${KADMIN_PASSWORD} admin/admin@${REALM}"
+  kadmin.local -p /admin -q "addprinc -pw ${KADMIN_PASSWORD} admin/admin@${REALM}"
 fi
